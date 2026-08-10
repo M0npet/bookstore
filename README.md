@@ -61,5 +61,26 @@ python manage.py test
 - `DELETE /api/books/<id>/` — видалити книгу
 - `GET /api/categories/` — категорії
 
+<<<<<<< HEAD
 ## Автор
 Курсовий проєкт студента групи ЗПІ 3.1.
+=======
+## Розгортання на хостингу (PythonAnywhere)
+
+Проєкт використовує змінні оточення, тому ті самі файли працюють
+і локально, і на сервері.
+
+Змінні оточення для робочого режиму:
+- `DJANGO_SECRET_KEY` — секретний ключ (унікальний, не зберігається в коді)
+- `DJANGO_DEBUG=False` — вимикає режим налагодження
+- `DJANGO_ALLOWED_HOSTS` — домен сайту, напр. `username.pythonanywhere.com`
+
+Коли `DEBUG=False`, автоматично вмикаються засоби захисту:
+HTTPS-перенаправлення, HSTS, захищені cookie, заборона фреймів,
+захист від MIME-sniffing.
+
+Перед запуском на сервері:
+```
+python manage.py migrate
+python manage.py collectstatic --noinput
+```

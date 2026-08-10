@@ -7,10 +7,30 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # --- Безпека ---
-# УВАГА: для робочого розгортання ключ слід зберігати в змінних оточення.
-SECRET_KEY = "django-insecure-CHANGE-ME-IN-PRODUCTION-0123456789abcdef"
-DEBUG = True
-ALLOWED_HOSTS = ["*"]
+# Значення беруться зі змінних оточення. Це дозволяє використовувати ті самі
+# файли і локально (режим розробки), і на хостингу (робочий режим),
+# не зберігаючи секретний ключ у відкритому вигляді в коді.
+import os
+
+SECRET_KEY = os.environ.get(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-local-development-key-0123456789abcdef",
+)
+
+# DEBUG вмикається лише якщо явно задано DJANGO_DEBUG=True.
+# На хостингу цю змінну не задають — отже, DEBUG вимкнено (вимога безпеки).
+DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
+
+# Домени, з яких дозволено обслуговувати сайт.
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+_extra_hosts = os.environ.get("DJANGO_ALLOWED_HOSTS", "")
+if _extra_hosts:
+    ALLOWED_HOSTS += [h.strip() for h in _extra_hosts.split(",") if h.strip()]
+
+# Довірені джерела для CSRF (потрібно для HTTPS-домену хостингу).
+CSRF_TRUSTED_ORIGINS = [
+    f"https://{h}" for h in ALLOWED_HOSTS if h not in ("127.0.0.1", "localhost")
+]
 
 # --- Застосунки ---
 INSTALLED_APPS = [
@@ -125,3 +145,21 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 12,
 }
+
+
+# --- Додаткові налаштування безпеки для робочого режиму ---
+# Вмикаються автоматично, коли DEBUG вимкнено (тобто на хостингу).
+if not DEBUG:
+    # Cookie передаються лише через захищене з'єднання HTTPS.
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    # Захист від визначення типу вмісту браузером (MIME-sniffing).
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    # Заборона відображення сайту в чужому фреймі (захист від clickjacking).
+    X_FRAME_OPTIONS = "DENY"
+    # Примусове перенаправлення всіх запитів на HTTPS.
+    SECURE_SSL_REDIRECT = True
+    # HSTS: браузер запам'ятовує, що сайт доступний лише через HTTPS.
+    SECURE_HSTS_SECONDS = 31536000  # 1 рік
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
