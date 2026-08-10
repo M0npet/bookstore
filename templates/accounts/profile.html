@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Профіль — Книгарня{% endblock %}
+{% block content %}
+<h1>Мій профіль</h1>
+<div class="layout">
+  <section>
+    <div class="form-card form-wide" style="margin:0">
+      <h2>Дані профілю</h2>
+      {% if user.avatar %}<p><img src="{{ user.avatar.url }}" alt="Аватар" style="width:120px;height:120px;object-fit:cover;border-radius:50%;border:3px solid var(--ochre)"></p>{% endif %}
+      <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        {% for field in form %}
+          <div class="form-row">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {{ field.errors }}
+          </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">Зберегти зміни</button>
+      </form>
+    </div>
+  </section>
+  <aside>
+    <div class="form-card" style="max-width:none;margin:0">
+      <h2>Історія замовлень</h2>
+      {% if orders %}
+        {% for order in orders %}
+          <div style="border-bottom:1px solid var(--parchment-dark);padding:.6rem 0">
+            <a href="{% url 'orders:order_detail' order.id %}"><strong>Замовлення №{{ order.id }}</strong></a>
+            <div class="muted" style="font-size:.85rem">
+              {{ order.created_at|date:"d.m.Y H:i" }} · {{ order.get_status_display }} · {{ order.total }} грн
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="muted">Замовлень ще немає.</p>
+      {% endif %}
+    </div>
+  </aside>
+</div>
+{% endblock %}

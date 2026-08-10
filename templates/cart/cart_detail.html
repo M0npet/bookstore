@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Кошик — Книгарня{% endblock %}
+{% block content %}
+<h1>Кошик</h1>
+{% if items %}
+  <table class="table">
+    <thead>
+      <tr><th>Книга</th><th>Тип</th><th>Ціна</th><th>Кількість</th><th>Сума</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+        {% with book=item.book %}
+        <tr>
+          <td><a href="{{ book.get_absolute_url }}">{{ book.title }}</a><br><span class="muted">{{ book.author }}</span></td>
+          <td><span class="badge badge-{{ book.book_type }}">{{ book.get_book_type_display }}</span></td>
+          <td>{{ item.price }} грн</td>
+          <td>
+            {% if book.is_print %}
+              <form action="{% url 'cart:cart_update' book.id %}" method="post" class="qty-form">
+                {% csrf_token %}
+                <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ book.stock }}">
+                <button type="submit" class="btn btn-sm btn-outline">↻</button>
+              </form>
+            {% else %}
+              1 <span class="muted">(е-книга)</span>
+            {% endif %}
+          </td>
+          <td>{{ item.total_price }} грн</td>
+          <td>
+            <form action="{% url 'cart:cart_remove' book.id %}" method="post">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-accent">✕</button>
+            </form>
+          </td>
+        </tr>
+        {% endwith %}
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr class="total-row">
+        <td colspan="4">Усього до сплати</td>
+        <td colspan="2">{{ cart.get_total_price }} грн</td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <div class="toolbar mt">
+    <a href="{% url 'catalog:book_list' %}" class="btn btn-outline">← Продовжити покупки</a>
+    {% if user.is_authenticated %}
+      <a href="{% url 'orders:order_create' %}" class="btn btn-primary">Оформити замовлення</a>
+    {% else %}
+      <a href="{% url 'accounts:login' %}?next={% url 'orders:order_create' %}" class="btn btn-primary">Увійдіть, щоб оформити</a>
+    {% endif %}
+  </div>
+{% else %}
+  <div class="empty-state">
+    <h2>Кошик порожній</h2>
+    <p>Додайте книги з каталогу.</p>
+    <a href="{% url 'catalog:book_list' %}" class="btn btn-primary mt">До каталогу</a>
+  </div>
+{% endif %}
+{% endblock %}

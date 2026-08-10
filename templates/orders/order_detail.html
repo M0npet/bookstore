@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Замовлення №{{ order.id }}{% endblock %}
+{% block content %}
+<h1>Замовлення №{{ order.id }}</h1>
+<p class="muted">{{ order.created_at|date:"d.m.Y H:i" }} · Статус: <strong>{{ order.get_status_display }}</strong></p>
+
+<table class="table mt">
+  <thead><tr><th>Книга</th><th>Тип</th><th>Ціна</th><th>К-сть</th><th>Сума</th><th></th></tr></thead>
+  <tbody>
+    {% for item in order.items.all %}
+      <tr>
+        <td>{{ item.book.title }}<br><span class="muted">{{ item.book.author }}</span></td>
+        <td><span class="badge badge-{{ item.book.book_type }}">{{ item.book.get_book_type_display }}</span></td>
+        <td>{{ item.price }} грн</td>
+        <td>{{ item.quantity }}</td>
+        <td>{{ item.subtotal }} грн</td>
+        <td>
+          {% if item.book.is_electronic %}
+            <a href="{% url 'orders:download_ebook' item.book.id %}" class="btn btn-sm btn-accent">⬇ Завантажити</a>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot><tr class="total-row"><td colspan="4">Усього</td><td colspan="2">{{ order.total }} грн</td></tr></tfoot>
+</table>
+
+{% if order.needs_delivery %}
+  <div class="form-card mt" style="max-width:none">
+    <h2>Доставка</h2>
+    <p>{{ order.full_name }}, {{ order.phone }}<br>Адреса: {{ order.address }}</p>
+  </div>
+{% endif %}
+
+<a href="{% url 'accounts:profile' %}" class="btn btn-outline mt">← До профілю</a>
+{% endblock %}

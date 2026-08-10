@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{{ book.title }} — Книгарня{% endblock %}
+{% block content %}
+<p><a href="{% url 'catalog:book_list' %}">← До каталогу</a></p>
+<div class="book-detail">
+  <div class="cover-lg">
+    {% if book.cover %}<img src="{{ book.cover.url }}" alt="{{ book.title }}">
+    {% else %}<span class="placeholder">{{ book.title }}</span>{% endif %}
+  </div>
+  <div>
+    <h1>{{ book.title }}</h1>
+    <p class="muted" style="font-size:1.1rem">{{ book.author }}</p>
+    <div class="detail-meta">
+      <span class="badge badge-{{ book.book_type }}">{{ book.get_book_type_display }}</span>
+      <span class="muted">Категорія: <a href="{{ book.category.get_absolute_url }}">{{ book.category.name }}</a></span>
+      {% if book.is_print %}
+        <span class="muted">На складі: {{ book.stock }} шт.</span>
+      {% endif %}
+    </div>
+    <p class="price" style="font-size:2rem">{{ book.price }} <small>грн</small></p>
+    <p>{{ book.description }}</p>
+
+    {% if book.in_stock %}
+      <form action="{% url 'cart:cart_add' book.id %}" method="post" class="mt">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-accent">До кошика</button>
+      </form>
+    {% else %}
+      <p class="mt"><span class="badge badge-print">Немає в наявності</span></p>
+    {% endif %}
+
+    {% if book.is_print %}
+      <p class="muted mt">📦 Друкована книга — доставка поштою.</p>
+    {% else %}
+      <p class="muted mt">⬇ Електронна книга — завантаження після оплати.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

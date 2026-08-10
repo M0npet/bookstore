@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Каталог книг — Книгарня{% endblock %}
+{% block content %}
+<div class="layout">
+  <aside class="sidebar">
+    <h3>Категорії</h3>
+    <ul class="cat-list">
+      <li><a href="{% url 'catalog:book_list' %}" {% if not category %}class="active"{% endif %}>Усі книги</a></li>
+      {% for cat in categories %}
+        <li><a href="{{ cat.get_absolute_url }}" {% if category.slug == cat.slug %}class="active"{% endif %}>{{ cat.name }}</a></li>
+      {% endfor %}
+    </ul>
+    <h3>Тип</h3>
+    <div class="type-filter">
+      <a href="?{% if query %}q={{ query }}&{% endif %}" class="{% if not selected_type %}active{% endif %}">Усі</a>
+      <a href="?{% if query %}q={{ query }}&{% endif %}type=print" class="{% if selected_type == 'print' %}active{% endif %}">Друковані</a>
+      <a href="?{% if query %}q={{ query }}&{% endif %}type=electronic" class="{% if selected_type == 'electronic' %}active{% endif %}">Електронні</a>
+    </div>
+  </aside>
+
+  <section>
+    <div class="toolbar">
+      <h1>{% if category %}{{ category.name }}{% elif query %}Результати пошуку{% else %}Каталог книг{% endif %}</h1>
+      <span class="muted">Знайдено: {{ books.paginator.count }}</span>
+    </div>
+
+    {% if books %}
+      <div class="book-grid">
+        {% for book in books %}
+          <article class="book-card">
+            <a href="{{ book.get_absolute_url }}" class="book-cover">
+              {% if book.cover %}<img src="{{ book.cover.url }}" alt="{{ book.title }}">
+              {% else %}<span class="placeholder">{{ book.title }}</span>{% endif %}
+            </a>
+            <div class="body">
+              <h2 class="title"><a href="{{ book.get_absolute_url }}">{{ book.title }}</a></h2>
+              <p class="author">{{ book.author }}</p>
+              <span class="badge badge-{{ book.book_type }}">{{ book.get_book_type_display }}</span>
+              <div class="meta">
+                <span class="price">{{ book.price }} <small>грн</small></span>
+                <a href="{{ book.get_absolute_url }}" class="btn btn-sm btn-outline">Детальніше</a>
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+
+      {% if books.paginator.num_pages > 1 %}
+        <div class="pagination">
+          {% if books.has_previous %}<a href="?page={{ books.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_type %}&type={{ selected_type }}{% endif %}">‹</a>{% endif %}
+          {% for num in books.paginator.page_range %}
+            {% if num == books.number %}<span class="current">{{ num }}</span>
+            {% else %}<a href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if selected_type %}&type={{ selected_type }}{% endif %}">{{ num }}</a>{% endif %}
+          {% endfor %}
+          {% if books.has_next %}<a href="?page={{ books.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_type %}&type={{ selected_type }}{% endif %}">›</a>{% endif %}
+        </div>
+      {% endif %}
+    {% else %}
+      <div class="empty-state">
+        <h2>Нічого не знайдено</h2>
+        <p>Спробуйте змінити запит або перегляньте всі книги.</p>
+        <a href="{% url 'catalog:book_list' %}" class="btn btn-primary mt">Усі книги</a>
+      </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

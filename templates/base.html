@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Книгарня{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a href="{% url 'catalog:book_list' %}" class="logo"><span class="mark">❧</span> Книгарня</a>
+      <form class="search-form" action="{% url 'catalog:book_list' %}" method="get" role="search">
+        <input type="text" name="q" placeholder="Пошук за назвою або автором…" value="{{ query|default:'' }}" aria-label="Пошук">
+        <button type="submit">Знайти</button>
+      </form>
+      <nav class="header-nav">
+        <a href="{% url 'cart:cart_detail' %}">Кошик
+          {% if cart|length %}<span class="cart-badge">{{ cart|length }}</span>{% endif %}
+        </a>
+        {% if user.is_authenticated %}
+          <a href="{% url 'accounts:profile' %}">Профіль</a>
+          <form action="{% url 'accounts:logout' %}" method="post" style="display:inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-accent">Вийти</button>
+          </form>
+        {% else %}
+          <a href="{% url 'accounts:login' %}">Увійти</a>
+          <a href="{% url 'accounts:register' %}" class="btn btn-sm btn-accent">Реєстрація</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      {% if messages %}
+        <ul class="messages">
+          {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <strong>Книгарня</strong> — інтернет-магазин друкованих та електронних книг.<br>
+      Курсовий проєкт з дисципліни «Веб-технології та веб-дизайн». © {% now "Y" %}
+    </div>
+  </footer>
+</body>
+</html>

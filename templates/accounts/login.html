@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Вхід — Книгарня{% endblock %}
+{% block content %}
+<div class="form-card">
+  <h1 class="text-center">Вхід</h1>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="form-row">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {{ field.errors }}
+      </div>
+    {% endfor %}
+    {% if form.non_field_errors %}<ul class="errorlist">{% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+    <button type="submit" class="btn btn-primary btn-block">Увійти</button>
+  </form>
+  <p class="text-center mt muted">
+    <a href="{% url 'accounts:password_reset' %}">Забули пароль?</a><br>
+    Немає акаунту? <a href="{% url 'accounts:register' %}">Зареєструватися</a>
+  </p>
+</div>
+{% endblock %}
