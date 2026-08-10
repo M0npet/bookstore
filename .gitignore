@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+venv/
+*.egg-info/
+
+# Django
+*.log
+db.sqlite3
+db.sqlite3-journal
+/staticfiles/
+
+# Медіа, завантажені користувачем (окрім демо-файлів — за бажанням)
+/media/avatars/
+
+# Середовище
+.env
+.DS_Store
+.idea/
+.vscode/
