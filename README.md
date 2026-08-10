@@ -60,3 +60,6 @@ python manage.py test
 - `GET /api/books/<id>/` — одна книга
 - `DELETE /api/books/<id>/` — видалити книгу
 - `GET /api/categories/` — категорії
+
+## Автор
+Курсовий проєкт студента групи КН-4.0X.
