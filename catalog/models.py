@@ -31,7 +31,7 @@ class Book(models.Model):
     """
     Книга. Підтримує два типи:
       - друкована (PRINT): має запас на складі, доставляється поштою;
-      - електронна (ELECTRONIC): має файл, завантажується після покупки.
+      - електронна (ELECTRONIC): має файл, завантажується після придбання.
     """
 
     class BookType(models.TextChoices):
@@ -62,7 +62,7 @@ class Book(models.Model):
     # Тільки для друкованих: кількість на складі.
     stock = models.PositiveIntegerField("Запас на складі", default=0)
 
-    # Тільки для електронних: файл для завантаження після покупки.
+    # Тільки для електронних: файл для завантаження після придбання.
     digital_file = models.FileField(
         "Файл книги", upload_to="ebooks/", blank=True, null=True
     )

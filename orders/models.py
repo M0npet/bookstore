@@ -58,7 +58,7 @@ class OrderItem(models.Model):
         on_delete=models.PROTECT,
         related_name="order_items",
     )
-    # Ціну фіксуємо на момент покупки — щоб подальша зміна ціни книги
+    # Ціну фіксуємо на момент придбання — щоб подальша зміна ціни книги
     # не впливала на вже оформлені замовлення.
     price = models.DecimalField("Ціна", max_digits=8, decimal_places=2)
     quantity = models.PositiveIntegerField("Кількість", default=1)
