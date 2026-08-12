@@ -49,3 +49,32 @@ class CartTests(TestCase):
         cart = self.client.session.get("cart", {})
         self.assertNotIn(str(self.book.id), cart)
         self.assertContains(response, "недоступна")
+
+    def test_mixed_cart_with_unavailable_item(self):
+        """
+        Кошик із доступною та недоступною книгами опрацьовується коректно.
+
+        Перевіряє, що перегляд кошика не порушує серіалізацію сесії:
+        дані сесії мають залишатися придатними для збереження у форматі JSON.
+        """
+        other = Book.objects.create(
+            title="Друга книга", author="Автор", slug="druha-knyha",
+            category=self.category, price=Decimal("250.00"),
+            book_type=Book.BookType.PRINT, stock=3, available=True,
+        )
+        self.client.post(reverse("cart:cart_add", args=[self.book.id]))
+        self.client.post(reverse("cart:cart_add", args=[other.id]))
+
+        self.book.available = False
+        self.book.save()
+
+        response = self.client.get(reverse("cart:cart_detail"))
+        self.assertEqual(response.status_code, 200)
+
+        cart = self.client.session.get("cart", {})
+        self.assertNotIn(str(self.book.id), cart)
+        self.assertIn(str(other.id), cart)
+
+        # Ціна в сесії має лишатися рядком, придатним для JSON
+        self.assertIsInstance(cart[str(other.id)]["price"], str)
+        self.assertNotIn("book", cart[str(other.id)])

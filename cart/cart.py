@@ -85,20 +85,30 @@ class Cart:
             self.save()
 
     def __iter__(self):
-        """Перебір позицій кошика з підвантаженням об'єктів книг."""
-        self._sync_availability()
-        book_ids = self.cart.keys()
-        books = Book.objects.filter(id__in=book_ids)
-        cart = self.cart.copy()
-        for book in books:
-            cart[str(book.id)]["book"] = book
+        """
+        Перебір позицій кошика з підвантаженням об'єктів книг.
 
-        for item in cart.values():
-            if "book" not in item:
+        ВАЖЛИВО: метод не змінює дані, збережені в сесії. Для кожної позиції
+        формується окремий словник, а ціна перетворюється на тип Decimal лише
+        в ньому. Пряме змінення self.cart призвело б до потрапляння в сесію
+        об'єктів Decimal та моделей, які не серіалізуються у формат JSON.
+        """
+        self._sync_availability()
+        book_ids = list(self.cart.keys())
+        books = {str(b.id): b for b in Book.objects.filter(id__in=book_ids)}
+
+        for book_id, stored in self.cart.items():
+            book = books.get(book_id)
+            if book is None:
                 continue
-            item["price"] = Decimal(item["price"])
-            item["total_price"] = item["price"] * item["quantity"]
-            yield item
+            price = Decimal(stored["price"])
+            quantity = stored["quantity"]
+            yield {
+                "book": book,
+                "price": price,
+                "quantity": quantity,
+                "total_price": price * quantity,
+            }
 
     def __len__(self):
         """Загальна кількість одиниць товару в кошику."""
